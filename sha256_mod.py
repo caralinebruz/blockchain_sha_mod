@@ -223,13 +223,16 @@ if __name__ == "__main__":
 	print("execution of modified sha-256 with sigma_0 rotation twice:")
 
 	print(generate_hash("Hello").hex())
+	print(generate_hash("Hello,").hex())
 	print(generate_hash("Hello, I am using a modified sha-256 algorithm").hex())
+	print(generate_hash("Hello, I am using a modified sha-256 algorithm.").hex())
+
 	print(generate_hash("This algorithm performs double rotation of the sigma_0 value").hex())
 	print(generate_hash("The rest of the algorithm remains the same.").hex())
 
 	print(generate_hash("My algorithm only affects the term_2 portion ...").hex())
 	print(generate_hash("... in the suffix ...").hex())
 	print(generate_hash("... of each 512 bit chunks of message. ").hex())
-	
+
 	print(generate_hash("Thank you.").hex())
 
