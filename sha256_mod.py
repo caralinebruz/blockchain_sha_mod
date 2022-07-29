@@ -59,8 +59,8 @@ def generate_hash(message: bytearray) -> bytearray:
 
 	assert (len(message) * 8) % 512 == 0, "Padding did not complete properly!"
 	# done with padding 
-	print(message)
-	print("done with padding.")
+	# print(message)
+	# print("done with padding.")
 
 
 	# Parsing
@@ -77,7 +77,7 @@ def generate_hash(message: bytearray) -> bytearray:
 	# Setting Initial Hash Value
 	# Initialize hash values:
 	#    (first 32 bits of the fractional parts of the square roots of the first 8 primes 2..19):
-	print("initializing the 8 h values ...")
+	# print("initializing the 8 h values ...")
 	h0 = 0x6a09e667
 	h1 = 0xbb67ae85
 	h2 = 0x3c6ef372
@@ -89,9 +89,9 @@ def generate_hash(message: bytearray) -> bytearray:
 
 	# SHA-256 Hash Computation
 	# Process the message in successive 512-bit chunks:
-	print("process each 512 bit chunk of message ...")
+	# print("process each 512 bit chunk of message ...")
 	for message_block in blocks:
-		print("processing next chunk ...")
+		# print("processing next chunk ...")
 
 		# Prepare message schedule
 		message_schedule = []
@@ -118,8 +118,8 @@ def generate_hash(message: bytearray) -> bytearray:
 
 
 		assert len(message_schedule) == 64
-		print("message schedule of this chunk:")
-		print(message_schedule)
+		# print("message schedule of this chunk:")
+		# print(message_schedule)
 
 		# Initialize working variables
 		# Initialize hash value for this chunk:
@@ -163,7 +163,7 @@ def generate_hash(message: bytearray) -> bytearray:
 		h6 = (h6 + g) % 2**32
 		h7 = (h7 + h) % 2**32
 
-		print((h0).to_bytes(4, 'big'))
+		# print((h0).to_bytes(4, 'big'))
 
 
 	# Produce the final hash value (big-endian) as a 160-bit number:
@@ -219,4 +219,17 @@ def _rotate_right(num: int, shift: int, size: int = 32):
 	return (num >> shift) | (num << size - shift)
 
 if __name__ == "__main__":
+
+	print("execution of modified sha-256 with sigma_0 rotation twice:")
+
 	print(generate_hash("Hello").hex())
+	print(generate_hash("Hello, I am using a modified sha-256 algorithm").hex())
+	print(generate_hash("This algorithm performs double rotation of the sigma_0 value").hex())
+	print(generate_hash("The rest of the algorithm remains the same.").hex())
+
+	print(generate_hash("My algorithm only affects the term_2 portion ...").hex())
+	print(generate_hash("... in the suffix ...").hex())
+	print(generate_hash("... of each 512 bit chunks of message. ").hex())
+	
+	print(generate_hash("Thank you.").hex())
+
