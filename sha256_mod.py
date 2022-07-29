@@ -1,6 +1,30 @@
-"""This Python module is an implementation of the SHA-256 algorithm.
-From https://github.com/keanemind/Python-SHA-256"""
+#!/usr/bin/env python3
 
+"""
+** Modified by Caraline Bruzinski
+** cb4904@nyu.edu
+
+Forked from an implementation of the SHA-256 algorithm.
+Forked from https://github.com/keanemind/Python-SHA-256
+
+** pseudocode for the algorithm here:
+**   https://en.wikipedia.org/wiki/SHA-1
+
+"""
+
+'''
+Note 1: All variables are 32 bit unsigned integers and addition is calculated modulo 232
+Note 2: For each round, there is one round constant k[i] and one entry in the message schedule array w[i], 0 ≤ i ≤ 63
+Note 3: The compression function uses 8 working variables, a through h
+Note 4: Big-endian convention is used when expressing the constants in this pseudocode,
+    and when parsing message block data from bytes to words, for example,
+    the first word of the input message "abc" after padding is 0x61626380
+'''
+
+
+
+# Initialize array of round constants:
+#  (first 32 bits of the fractional parts of the cube roots of the first 64 primes 2..311):
 K = [
     0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
     0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
@@ -24,6 +48,7 @@ def generate_hash(message: bytearray) -> bytearray:
     elif not isinstance(message, bytearray):
         raise TypeError
 
+
     # Padding
     length = len(message) * 8 # len(message) is number of BYTES!!!
     message.append(0x80)
@@ -33,13 +58,25 @@ def generate_hash(message: bytearray) -> bytearray:
     message += length.to_bytes(8, 'big') # pad to 8 bytes or 64 bits
 
     assert (len(message) * 8) % 512 == 0, "Padding did not complete properly!"
+    # done with padding 
+    print(message)
+    print("done with padding.")
+
 
     # Parsing
     blocks = [] # contains 512-bit chunks of message
     for i in range(0, len(message), 64): # 64 bytes is 512 bits
         blocks.append(message[i:i+64])
 
+    # caraline's check each block chunk of 512 bits
+    for i in range(len(blocks)):
+        print(i)
+        print(blocks[i])
+
+
     # Setting Initial Hash Value
+    # Initialize hash values:
+    #    (first 32 bits of the fractional parts of the square roots of the first 8 primes 2..19):
     h0 = 0x6a09e667
     h1 = 0xbb67ae85
     h2 = 0x3c6ef372
@@ -50,15 +87,20 @@ def generate_hash(message: bytearray) -> bytearray:
     h7 = 0x5be0cd19
 
     # SHA-256 Hash Computation
+    # Process the message in successive 512-bit chunks:
     for message_block in blocks:
         # Prepare message schedule
         message_schedule = []
         for t in range(0, 64):
+
+            # Message schedule: extend the sixteen 32-bit words into eighty 32-bit words:
             if t <= 15:
                 # adds the t'th 32 bit word of the block,
                 # starting from leftmost word
                 # 4 bytes at a time
                 message_schedule.append(bytes(message_block[t*4:(t*4)+4]))
+
+            # for the remainder of the words, do the rotation    
             else:
                 term1 = _sigma1(int.from_bytes(message_schedule[t-2], 'big'))
                 term2 = int.from_bytes(message_schedule[t-7], 'big')
@@ -69,9 +111,11 @@ def generate_hash(message: bytearray) -> bytearray:
                 schedule = ((term1 + term2 + term3 + term4) % 2**32).to_bytes(4, 'big')
                 message_schedule.append(schedule)
 
+
         assert len(message_schedule) == 64
 
         # Initialize working variables
+        # Initialize hash value for this chunk:
         a = h0
         b = h1
         c = h2
@@ -81,6 +125,7 @@ def generate_hash(message: bytearray) -> bytearray:
         g = h6
         h = h7
 
+        # Main Loop
         # Iterate for t=0 to 63
         for t in range(64):
             t1 = ((h + _capsigma1(e) + _ch(e, f, g) + K[t] +
@@ -98,6 +143,7 @@ def generate_hash(message: bytearray) -> bytearray:
             a = (t1 + t2) % 2**32
 
         # Compute intermediate hash value
+        # AKA add this chunk's hash to the result so far:
         h0 = (h0 + a) % 2**32
         h1 = (h1 + b) % 2**32
         h2 = (h2 + c) % 2**32
@@ -107,10 +153,14 @@ def generate_hash(message: bytearray) -> bytearray:
         h6 = (h6 + g) % 2**32
         h7 = (h7 + h) % 2**32
 
+
+    # Produce the final hash value (big-endian) as a 160-bit number:
     return ((h0).to_bytes(4, 'big') + (h1).to_bytes(4, 'big') +
             (h2).to_bytes(4, 'big') + (h3).to_bytes(4, 'big') +
             (h4).to_bytes(4, 'big') + (h5).to_bytes(4, 'big') +
             (h6).to_bytes(4, 'big') + (h7).to_bytes(4, 'big'))
+
+
 
 def _sigma0(num: int):
     """As defined in the specification."""
